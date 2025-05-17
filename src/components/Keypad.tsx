@@ -34,37 +34,63 @@ const standardButtons = [
 ];
 
 const scientificButtons = [
-  // Row 1: Inverse and Hyperbolic Functions
-  { label: 'sin⁻¹', value: 'asin(', type: 'function', shortcut: 'Shift+S' },
-  { label: 'cos⁻¹', value: 'acos(', type: 'function', shortcut: 'Shift+C' },
-  { label: 'tan⁻¹', value: 'atan(', type: 'function', shortcut: 'Shift+T' },
-  { label: 'sinh', value: 'sinh(', type: 'function', shortcut: 'Alt+S' },
-  { label: 'cosh', value: 'cosh(', type: 'function', shortcut: 'Alt+C' },
-  { label: 'tanh', value: 'tanh(', type: 'function', shortcut: 'Alt+T' },
-  
-  // Row 2: Basic Trig and Constants
-  { label: 'sin', value: 'sin(', type: 'function', shortcut: 's' },
-  { label: 'cos', value: 'cos(', type: 'function', shortcut: 'c' },
-  { label: 'tan', value: 'tan(', type: 'function', shortcut: 't' },
-  { label: 'π', value: 'pi', type: 'constant', shortcut: 'p' },
-  { label: 'e', value: 'e', type: 'constant', shortcut: 'e' },
-  { label: 'φ', value: '1.618033988749895', type: 'constant', shortcut: 'g' },
+  // Group 1: Basic Controls and Memory
+  { label: 'C', value: 'clear', type: 'control', shortcut: 'Esc', group: 'control' },
+  { label: '⌫', value: 'backspace', type: 'control', shortcut: 'Backspace', group: 'control' },
+  { label: 'M+', value: 'memoryAdd', type: 'memory', shortcut: 'Shift+M', group: 'memory' },
+  { label: 'M-', value: 'memorySub', type: 'memory', shortcut: 'Shift+N', group: 'memory' },
+  { label: 'MR', value: 'memoryRecall', type: 'memory', shortcut: 'm', group: 'memory' },
+  { label: 'MC', value: 'memoryClear', type: 'memory', shortcut: 'Shift+C', group: 'memory' },
 
-  // Row 3: Advanced Functions
-  { label: 'log', value: 'log10(', type: 'function', shortcut: 'l' },
-  { label: 'ln', value: 'log(', type: 'function', shortcut: 'n' },
-  { label: '√', value: 'sqrt(', type: 'function', shortcut: 'q' },
-  { label: 'x²', value: '^2', type: 'operator', shortcut: '@' },
-  { label: 'x³', value: '^3', type: 'operator', shortcut: '#' },
-  { label: 'xʸ', value: '^', type: 'operator', shortcut: '^' },
+  // Group 2: Constants and Special Numbers
+  { label: 'π', value: 'pi', type: 'constant', shortcut: 'p', group: 'constant' },
+  { label: 'e', value: 'e', type: 'constant', shortcut: 'e', group: 'constant' },
+  { label: 'φ', value: '1.618033988749895', type: 'constant', shortcut: 'g', group: 'constant' },
+  { label: '∞', value: 'Infinity', type: 'constant', shortcut: 'i', group: 'constant' },
 
-  // Row 4: Memory and Special Functions
-  { label: '(', value: '(', type: 'operator', shortcut: '(' },
-  { label: ')', value: ')', type: 'operator', shortcut: ')' },
-  { label: '!', value: '!', type: 'operator', shortcut: '!' },
-  { label: 'M+', value: 'memoryAdd', type: 'memory', shortcut: 'Shift+M' },
-  { label: 'M-', value: 'memorySub', type: 'memory', shortcut: 'Shift+N' },
-  { label: 'MR', value: 'memoryRecall', type: 'memory', shortcut: 'm' },
+  // Group 3: Advanced Functions
+  { label: 'x²', value: '^2', type: 'operator', shortcut: '@', group: 'power' },
+  { label: 'x³', value: '^3', type: 'operator', shortcut: '#', group: 'power' },
+  { label: 'xʸ', value: '^', type: 'operator', shortcut: '^', group: 'power' },
+  { label: '√', value: 'sqrt(', type: 'function', shortcut: 'q', group: 'power' },
+  { label: '∛', value: 'cbrt(', type: 'function', shortcut: 'Shift+Q', group: 'power' },
+  { label: 'ⁿ√', value: 'nthRoot(', type: 'function', shortcut: 'Shift+R', group: 'power' },
+
+  // Group 4: Logarithmic Functions
+  { label: 'log', value: 'log10(', type: 'function', shortcut: 'l', group: 'log' },
+  { label: 'ln', value: 'log(', type: 'function', shortcut: 'n', group: 'log' },
+  { label: 'logₐ', value: 'log(', type: 'function', shortcut: 'Shift+L', group: 'log' },
+  { label: 'eˣ', value: 'exp(', type: 'function', shortcut: 'Shift+E', group: 'log' },
+
+  // Group 5: Trigonometric Functions
+  { label: 'sin', value: 'sin(', type: 'function', shortcut: 's', group: 'trig' },
+  { label: 'cos', value: 'cos(', type: 'function', shortcut: 'c', group: 'trig' },
+  { label: 'tan', value: 'tan(', type: 'function', shortcut: 't', group: 'trig' },
+  { label: 'sin⁻¹', value: 'asin(', type: 'function', shortcut: 'Shift+S', group: 'trig' },
+  { label: 'cos⁻¹', value: 'acos(', type: 'function', shortcut: 'Shift+C', group: 'trig' },
+  { label: 'tan⁻¹', value: 'atan(', type: 'function', shortcut: 'Shift+T', group: 'trig' },
+
+  // Group 6: Hyperbolic Functions
+  { label: 'sinh', value: 'sinh(', type: 'function', shortcut: 'Alt+S', group: 'hyp' },
+  { label: 'cosh', value: 'cosh(', type: 'function', shortcut: 'Alt+C', group: 'hyp' },
+  { label: 'tanh', value: 'tanh(', type: 'function', shortcut: 'Alt+T', group: 'hyp' },
+  { label: 'sinh⁻¹', value: 'asinh(', type: 'function', shortcut: 'Alt+Shift+S', group: 'hyp' },
+  { label: 'cosh⁻¹', value: 'acosh(', type: 'function', shortcut: 'Alt+Shift+C', group: 'hyp' },
+  { label: 'tanh⁻¹', value: 'atanh(', type: 'function', shortcut: 'Alt+Shift+T', group: 'hyp' },
+
+  // Group 7: Algebra and Analysis
+  { label: 'factor', value: 'factor(', type: 'function', shortcut: 'f', group: 'algebra' },
+  { label: 'expand', value: 'expand(', type: 'function', shortcut: 'x', group: 'algebra' },
+  { label: 'gcd', value: 'gcd(', type: 'function', shortcut: 'Shift+G', group: 'algebra' },
+  { label: 'lcm', value: 'lcm(', type: 'function', shortcut: 'Shift+H', group: 'algebra' },
+  { label: 'mod', value: 'mod(', type: 'function', shortcut: 'Shift+M', group: 'algebra' },
+  { label: '|x|', value: 'abs(', type: 'function', shortcut: 'a', group: 'algebra' },
+
+  // Group 8: Basic Operators and Parentheses
+  { label: '(', value: '(', type: 'operator', shortcut: '(', group: 'operator' },
+  { label: ')', value: ')', type: 'operator', shortcut: ')', group: 'operator' },
+  { label: '!', value: '!', type: 'operator', shortcut: '!', group: 'operator' },
+  { label: '%', value: 'percent', type: 'operator', shortcut: '%', group: 'operator' },
 ];
 
 const MotionButton = motion(Button);
@@ -74,12 +100,10 @@ export default function Keypad({ mode, state, setState }: KeypadProps) {
     setState(prev => CalculatorService.handleButtonPress(value, type, prev));
   };
 
-  const buttons = mode === 'standard' ? standardButtons : [...scientificButtons, ...standardButtons];
-
-  return (
-    <Grid gutter="xs">
-      {buttons.map((button, index) => (
-        <Grid.Col span={mode === 'standard' ? 3 : 2} key={button.label}>
+  const renderButtons = () => {
+    if (mode === 'standard') {
+      return standardButtons.map((button, index) => (
+        <Grid.Col span={3} key={button.label}>
           <Tooltip label={`Shortcut: ${button.shortcut}`} position="top">
             <MotionButton
               fullWidth
@@ -96,7 +120,48 @@ export default function Keypad({ mode, state, setState }: KeypadProps) {
             </MotionButton>
           </Tooltip>
         </Grid.Col>
-      ))}
+      ));
+    }
+
+    // Group buttons by their group property
+    const groupedButtons = scientificButtons.reduce((acc, button) => {
+      const group = button.group || 'other';
+      if (!acc[group]) acc[group] = [];
+      acc[group].push(button);
+      return acc;
+    }, {} as Record<string, typeof scientificButtons>);
+
+    // Render buttons by group
+    return Object.entries(groupedButtons).map(([groupName, buttons]) => (
+      <Grid.Col span={12} key={groupName}>
+        <Grid>
+          {buttons.map((button) => (
+            <Grid.Col span={2} key={button.label}>
+              <Tooltip label={`Shortcut: ${button.shortcut}`} position="top">
+                <MotionButton
+                  fullWidth
+                  size="xl"
+                  variant={button.type === 'operator' ? 'light' : 'filled'}
+                  onClick={() => handleButtonClick(button.value, button.type)}
+                  whileHover={{ scale: CALCULATOR_CONSTANTS.HOVER_BRIGHTNESS }}
+                  whileTap={{ scale: CALCULATOR_CONSTANTS.ACTIVE_SCALE }}
+                  style={{
+                    height: `${CALCULATOR_CONSTANTS.BUTTON_SIZE}px`,
+                  }}
+                >
+                  {button.label}
+                </MotionButton>
+              </Tooltip>
+            </Grid.Col>
+          ))}
+        </Grid>
+      </Grid.Col>
+    ));
+  };
+
+  return (
+    <Grid gutter="xs">
+      {renderButtons()}
     </Grid>
   );
 } 
