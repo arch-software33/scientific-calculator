@@ -49,9 +49,9 @@ const scientificButtons = [
   { label: '∞', value: 'Infinity', type: 'constant', shortcut: 'i', group: 'constant' },
 
   // Group 3: Advanced Functions
-  { label: 'x²', value: '^2', type: 'operator', shortcut: '@', group: 'power' },
-  { label: 'x³', value: '^3', type: 'operator', shortcut: '#', group: 'power' },
-  { label: 'xʸ', value: '^', type: 'operator', shortcut: '^', group: 'power' },
+  { label: <SuperscriptButton base="x" exponent="2" />, value: '^2', type: 'operator', shortcut: '@', group: 'power' },
+  { label: <SuperscriptButton base="x" exponent="3" />, value: '^3', type: 'operator', shortcut: '#', group: 'power' },
+  { label: <SuperscriptButton base="x" exponent="n" />, value: '^', type: 'operator', shortcut: '^', group: 'power' },
   { label: '√', value: 'sqrt(', type: 'function', shortcut: 'q', group: 'power' },
   { label: '∛', value: 'cbrt(', type: 'function', shortcut: 'Shift+Q', group: 'power' },
   { label: 'ⁿ√', value: 'nthRoot(', type: 'function', shortcut: 'Shift+R', group: 'power' },
@@ -94,6 +94,33 @@ const scientificButtons = [
 ];
 
 const MotionButton = motion(Button);
+
+const SuperscriptButton = ({ base, exponent, onClick }: { base: string; exponent: string; onClick: () => void }) => (
+  <MotionButton
+    fullWidth
+    size="xl"
+    variant="light"
+    onClick={onClick}
+    whileHover={{ scale: CALCULATOR_CONSTANTS.HOVER_BRIGHTNESS }}
+    whileTap={{ scale: CALCULATOR_CONSTANTS.ACTIVE_SCALE }}
+    style={{
+      height: `${CALCULATOR_CONSTANTS.BUTTON_SIZE}px`,
+      position: 'relative',
+      fontFamily: 'monospace',
+    }}
+  >
+    {base}
+    <span style={{
+      position: 'absolute',
+      top: '0.5rem',
+      right: '0.5rem',
+      fontSize: '0.8em',
+      lineHeight: 1,
+    }}>
+      {exponent}
+    </span>
+  </MotionButton>
+);
 
 export default function Keypad({ mode, state, setState }: KeypadProps) {
   const handleButtonClick = (value: string, type: string) => {

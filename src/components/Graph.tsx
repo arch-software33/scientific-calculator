@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, TextInput, Button, Group, ColorInput, NumberInput, Switch, ActionIcon, Tooltip } from '@mantine/core';
-import { IconZoomIn, IconZoomOut, IconGridDots, IconMath, IconTrash } from '@tabler/icons-react';
+import { Box, TextInput, Button, Group, ColorInput, NumberInput, Switch, ActionIcon, Tooltip, Text } from '@mantine/core';
+import { IconZoomIn, IconZoomOut, IconGridDots, IconMath, IconTrash, IconPlus } from '@tabler/icons-react';
 import Plot from 'react-plotly.js';
-import { evaluate, derivative } from 'mathjs';
+import { evaluate, derivative, parse } from 'mathjs';
 import type { GraphFunction } from '../types/calculator';
 import type { Data } from 'plotly.js';
 
@@ -23,10 +23,17 @@ interface GraphSettings {
   gridDensity: number;
 }
 
+interface Variable {
+  name: string;
+  value: string;
+}
+
 export default function Graph() {
   const [functions, setFunctions] = useState<GraphFunction[]>([]);
   const [newFunction, setNewFunction] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [variables, setVariables] = useState<Variable[]>([]);
+  const [newVariable, setNewVariable] = useState<Variable>({ name: '', value: '' });
   const [settings, setSettings] = useState<GraphSettings>({
     showGrid: true,
     showDerivatives: false,
@@ -54,6 +61,19 @@ export default function Graph() {
     setError(null);
   };
 
+  const evaluateWithVariables = (expr: string, x: number) => {
+    try {
+      const scope = {
+        x,
+        ...Object.fromEntries(variables.map(v => [v.name, evaluate(v.value)]))
+      };
+      return evaluate(expr, scope);
+    } catch (error) {
+      console.error('Failed to evaluate with variables:', error);
+      return null;
+    }
+  };
+
   const generatePoints = (expression: string, range: [number, number] = settings.xRange): Points => {
     const points: Points = { x: [], y: [] };
     const step = (range[1] - range[0]) / POINTS;
@@ -61,7 +81,7 @@ export default function Graph() {
     try {
       for (let x = range[0]; x <= range[1]; x += step) {
         try {
-          const y = evaluate(expression.replace(/x/g, `(${x})`));
+          const y = evaluateWithVariables(expression, x);
           points.x.push(x);
           points.y.push(typeof y === 'number' ? y : null);
         } catch {
@@ -90,13 +110,18 @@ export default function Graph() {
     if (!newFunction) return;
 
     try {
-      // Clean up the expression
+      // Clean up the expression and handle y= prefix
       const cleanExpression = newFunction
-        .replace(/=/g, '') // Remove equals signs
+        .replace(/^y\s*=\s*/, '') // Remove y= prefix
+        .replace(/=/g, '') // Remove any other equals signs
         .trim();
 
-      // Test if the expression is valid
-      evaluate(cleanExpression.replace(/x/g, '(1)'));
+      // Test if the expression is valid with variables
+      const testScope = {
+        x: 1,
+        ...Object.fromEntries(variables.map(v => [v.name, evaluate(v.value)]))
+      };
+      evaluate(cleanExpression, testScope);
 
       const newGraphFunction: GraphFunction = {
         id: Date.now().toString(),
@@ -110,6 +135,18 @@ export default function Graph() {
       setError(null);
     } catch (err) {
       setError('Invalid expression');
+    }
+  };
+
+  const addVariable = () => {
+    if (!newVariable.name || !newVariable.value) return;
+    try {
+      // Test if the value is a valid expression
+      evaluate(newVariable.value);
+      setVariables(prev => [...prev, newVariable]);
+      setNewVariable({ name: '', value: '' });
+    } catch (err) {
+      setError('Invalid variable value');
     }
   };
 
@@ -192,6 +229,46 @@ export default function Graph() {
           </ActionIcon>
         </Tooltip>
       </Group>
+
+      <Box mb="md" p="sm" style={{ backgroundColor: 'var(--mantine-color-dark-6)', borderRadius: 'var(--mantine-radius-md)' }}>
+        <Text size="sm" weight={500} mb="xs">Variables</Text>
+        <Group align="flex-end">
+          <TextInput
+            placeholder="Variable name (e.g., a)"
+            value={newVariable.name}
+            onChange={(e) => setNewVariable(prev => ({ ...prev, name: e.currentTarget.value }))}
+            style={{ flex: 1 }}
+            size="sm"
+          />
+          <TextInput
+            placeholder="Value (e.g., 2 or sin(pi/4))"
+            value={newVariable.value}
+            onChange={(e) => setNewVariable(prev => ({ ...prev, value: e.currentTarget.value }))}
+            style={{ flex: 2 }}
+            size="sm"
+          />
+          <ActionIcon variant="filled" color="blue" onClick={addVariable}>
+            <IconPlus size={16} />
+          </ActionIcon>
+        </Group>
+        {variables.length > 0 && (
+          <Group mt="xs">
+            {variables.map((variable, index) => (
+              <Group key={index} spacing="xs">
+                <Text size="sm">{variable.name} = {variable.value}</Text>
+                <ActionIcon 
+                  size="xs" 
+                  variant="subtle" 
+                  color="red"
+                  onClick={() => setVariables(prev => prev.filter((_, i) => i !== index))}
+                >
+                  <IconTrash size={12} />
+                </ActionIcon>
+              </Group>
+            ))}
+          </Group>
+        )}
+      </Box>
 
       <Group mb="md">
         <Tooltip label="Zoom In">
