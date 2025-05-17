@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Box, TextInput, Button, Group, ColorInput, NumberInput, Switch, ActionIcon, Tooltip } from '@mantine/core';
-import { IconZoomIn, IconZoomOut, IconGridDots, IconMath } from '@tabler/icons-react';
+import { IconZoomIn, IconZoomOut, IconGridDots, IconMath, IconTrash } from '@tabler/icons-react';
 import Plot from 'react-plotly.js';
 import { evaluate, derivative } from 'mathjs';
 import type { GraphFunction } from '../types/calculator';
@@ -34,6 +34,25 @@ export default function Graph() {
     yRange: [...DEFAULT_RANGE],
     gridDensity: 10,
   });
+  const functionInputRef = useRef<HTMLInputElement>(null);
+
+  // Prevent keyboard shortcuts when input is focused
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (document.activeElement === functionInputRef.current) {
+        e.stopPropagation();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, []);
+
+  const clearAll = () => {
+    setFunctions([]);
+    setNewFunction('');
+    setError(null);
+  };
 
   const generatePoints = (expression: string, range: [number, number] = settings.xRange): Points => {
     const points: Points = { x: [], y: [] };
@@ -137,15 +156,21 @@ export default function Graph() {
 
   return (
     <Box>
-      <Group mb="md">
+      <Group mb="md" align="flex-end">
         <TextInput
           placeholder="Enter a function (e.g., sin(x))"
           value={newFunction}
           onChange={(e) => setNewFunction(e.target.value)}
           error={error}
           style={{ flex: 1 }}
+          ref={functionInputRef}
         />
         <Button onClick={addFunction}>Add Function</Button>
+        <Tooltip label="Clear All">
+          <ActionIcon variant="light" onClick={clearAll}>
+            <IconTrash />
+          </ActionIcon>
+        </Tooltip>
       </Group>
 
       <Group mb="md">

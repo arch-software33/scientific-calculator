@@ -62,11 +62,20 @@ export default function Calculator() {
   const [shortcutsOpened, setShortcutsOpened] = useState(false);
 
   const handleModeChange = (mode: CalculatorMode) => {
-    setState(prev => ({ ...prev, mode }));
+    setState(prev => ({ ...prev, mode, expression: '', display: '0', error: null }));
+  };
+
+  const handleExpressionChange = (expression: string) => {
+    setState(prev => ({ ...prev, expression, error: null }));
   };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Only handle keyboard shortcuts when not in graphing mode
+      if (state.mode === 'graphing' || document.activeElement?.tagName === 'INPUT') {
+        return;
+      }
+
       // Handle Shift + key combinations
       if (event.shiftKey) {
         switch (event.key.toLowerCase()) {
@@ -122,7 +131,7 @@ export default function Calculator() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [state.mode]);
 
   return (
     <Box
@@ -164,7 +173,14 @@ export default function Calculator() {
           </Tooltip>
         </Box>
 
-        <Display value={state.display} error={state.error} expression={state.expression} />
+        {state.mode !== 'graphing' && (
+          <Display 
+            value={state.display} 
+            error={state.error} 
+            expression={state.expression}
+            onExpressionChange={handleExpressionChange}
+          />
+        )}
 
         {state.mode === 'standard' && (
           <Keypad mode="standard" state={state} setState={setState} />
