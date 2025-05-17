@@ -193,12 +193,12 @@ export default function Graph() {
               color: f.color,
               dash: 'dash',
             },
-          };
+          } as Data;
         } catch (error) {
           console.error('Failed to plot derivative:', error);
-          return null;
+          return undefined;
         }
-      }).filter(Boolean);
+      }).filter((plot): plot is Data => plot !== undefined);
 
       return [...functionPlots, ...derivativePlots];
     } catch (error) {
@@ -231,19 +231,27 @@ export default function Graph() {
       </Group>
 
       <Box mb="md" p="sm" style={{ backgroundColor: 'var(--mantine-color-dark-6)', borderRadius: 'var(--mantine-radius-md)' }}>
-        <Text size="sm" weight={500} mb="xs">Variables</Text>
+        <Text size="sm" mb="xs" fw={500}>Variables</Text>
         <Group align="flex-end">
           <TextInput
             placeholder="Variable name (e.g., a)"
             value={newVariable.name}
-            onChange={(e) => setNewVariable(prev => ({ ...prev, name: e.currentTarget.value }))}
+            onChange={(e) => {
+              if (e.currentTarget) {
+                setNewVariable(prev => ({ ...prev, name: e.currentTarget.value }));
+              }
+            }}
             style={{ flex: 1 }}
             size="sm"
           />
           <TextInput
             placeholder="Value (e.g., 2 or sin(pi/4))"
             value={newVariable.value}
-            onChange={(e) => setNewVariable(prev => ({ ...prev, value: e.currentTarget.value }))}
+            onChange={(e) => {
+              if (e.currentTarget) {
+                setNewVariable(prev => ({ ...prev, value: e.currentTarget.value }));
+              }
+            }}
             style={{ flex: 2 }}
             size="sm"
           />
@@ -254,7 +262,7 @@ export default function Graph() {
         {variables.length > 0 && (
           <Group mt="xs">
             {variables.map((variable, index) => (
-              <Group key={index} spacing="xs">
+              <Group key={index} gap="xs">
                 <Text size="sm">{variable.name} = {variable.value}</Text>
                 <ActionIcon 
                   size="xs" 

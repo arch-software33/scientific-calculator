@@ -10,6 +10,32 @@ interface KeypadProps {
   setState: React.Dispatch<React.SetStateAction<CalculatorState>>;
 }
 
+const MotionButton = motion(Button);
+
+const SuperscriptButton = ({ base, exponent }: { base: string; exponent: string }) => (
+  <MotionButton
+    fullWidth
+    size="xl"
+    variant="light"
+    style={{
+      height: `${CALCULATOR_CONSTANTS.BUTTON_SIZE}px`,
+      position: 'relative',
+      fontFamily: 'monospace',
+    }}
+  >
+    {base}
+    <span style={{
+      position: 'absolute',
+      top: '0.5rem',
+      right: '0.5rem',
+      fontSize: '0.8em',
+      lineHeight: 1,
+    }}>
+      {exponent}
+    </span>
+  </MotionButton>
+);
+
 const standardButtons = [
   { label: 'C', value: 'clear', type: 'control', shortcut: 'Esc' },
   { label: '⌫', value: 'backspace', type: 'control', shortcut: 'Backspace' },
@@ -93,35 +119,6 @@ const scientificButtons = [
   { label: '%', value: 'percent', type: 'operator', shortcut: '%', group: 'operator' },
 ];
 
-const MotionButton = motion(Button);
-
-const SuperscriptButton = ({ base, exponent, onClick }: { base: string; exponent: string; onClick: () => void }) => (
-  <MotionButton
-    fullWidth
-    size="xl"
-    variant="light"
-    onClick={onClick}
-    whileHover={{ scale: CALCULATOR_CONSTANTS.HOVER_BRIGHTNESS }}
-    whileTap={{ scale: CALCULATOR_CONSTANTS.ACTIVE_SCALE }}
-    style={{
-      height: `${CALCULATOR_CONSTANTS.BUTTON_SIZE}px`,
-      position: 'relative',
-      fontFamily: 'monospace',
-    }}
-  >
-    {base}
-    <span style={{
-      position: 'absolute',
-      top: '0.5rem',
-      right: '0.5rem',
-      fontSize: '0.8em',
-      lineHeight: 1,
-    }}>
-      {exponent}
-    </span>
-  </MotionButton>
-);
-
 export default function Keypad({ mode, state, setState }: KeypadProps) {
   const handleButtonClick = (value: string, type: string) => {
     setState(prev => CalculatorService.handleButtonPress(value, type, prev));
@@ -163,7 +160,7 @@ export default function Keypad({ mode, state, setState }: KeypadProps) {
       <Grid.Col span={12} key={groupName}>
         <Grid>
           {buttons.map((button) => (
-            <Grid.Col span={2} key={button.label}>
+            <Grid.Col span={2} key={typeof button.label === 'string' ? button.label : button.value}>
               <Tooltip label={`Shortcut: ${button.shortcut}`} position="top">
                 <MotionButton
                   fullWidth
