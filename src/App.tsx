@@ -1,15 +1,28 @@
-import { MantineProvider, AppShell } from '@mantine/core';
-import { theme } from './theme';
+import { useState, useEffect } from 'react';
+import { MantineProvider } from '@mantine/core';
 import Calculator from './components/Calculator';
+import LoadingScreen from './components/LoadingScreen';
+import { theme } from './theme';
 
-function App() {
+export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate minimum loading time to prevent flash
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
-      <AppShell>
+      {isLoading ? (
+        <LoadingScreen />
+      ) : (
         <Calculator />
-      </AppShell>
+      )}
     </MantineProvider>
   );
 }
-
-export default App;

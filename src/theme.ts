@@ -1,10 +1,15 @@
 import { createTheme } from '@mantine/core';
 
+export const CALCULATOR_CONSTANTS = {
+  BUTTON_SIZE: 48,
+  HOVER_BRIGHTNESS: 1.2,
+  ACTIVE_SCALE: 0.95,
+};
+
 export const theme = createTheme({
   primaryColor: 'blue',
-  primaryShade: 6,
-  fontFamily: 'Inter, sans-serif',
   defaultRadius: 'md',
+  fontFamily: 'system-ui, -apple-system, sans-serif',
   colors: {
     dark: [
       '#C1C2C5',
@@ -36,12 +41,27 @@ export const theme = createTheme({
     lg: '0 4px 8px rgba(0, 0, 0, 0.25)',
     xl: '0 8px 16px rgba(0, 0, 0, 0.3)',
   },
-});
-
-export const CALCULATOR_CONSTANTS = {
-  BUTTON_SIZE: 56,
-  BUTTON_SPACING: 8,
-  ANIMATION_DURATION: 0.2,
-  HOVER_BRIGHTNESS: 1.2,
-  ACTIVE_SCALE: 0.95,
-} as const; 
+  components: {
+    Button: {
+      defaultProps: {
+        size: 'md',
+      },
+      styles: {
+        root: {
+          transition: 'all 0.2s ease',
+        },
+      },
+    },
+    TextInput: {
+      styles: {
+        input: {
+          backgroundColor: 'var(--mantine-color-dark-6)',
+          color: 'var(--mantine-color-white)',
+          '&::placeholder': {
+            color: 'var(--mantine-color-dark-2)',
+          },
+        },
+      },
+    },
+  },
+}); 

@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { Box, Text } from '@mantine/core';
+import { useEffect, useRef, useState } from 'react';
+import { Box, TextInput } from '@mantine/core';
 import { motion } from 'framer-motion';
 
 interface DisplayProps {
@@ -7,22 +7,32 @@ interface DisplayProps {
   error: string | null;
   expression: string;
   onExpressionChange?: (expression: string) => void;
+  onEnter?: () => void;
 }
 
-const MotionText = motion(Text);
+const MotionBox = motion(Box);
 
-export default function Display({ value, error, expression, onExpressionChange }: DisplayProps) {
-  const displayRef = useRef<HTMLDivElement>(null);
+export default function Display({ value, error, expression, onExpressionChange, onEnter }: DisplayProps) {
+  const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!onExpressionChange || document.activeElement?.tagName === 'INPUT') return;
 
-      // Allow only numbers, operators, and control keys
-      if (e.key.match(/^[0-9+\-*/().^!%]$/) || 
+      if (e.key === 'Enter' && onEnter) {
+        e.preventDefault();
+        e.stopPropagation();
+        onEnter();
+        return;
+      }
+
+      // Allow letters for variables and all valid operators
+      if (e.key.match(/^[0-9a-zA-Z+\-*/().^!%=]$/) || 
           e.key === 'Backspace' || 
           e.key === 'Delete' || 
-          e.key === 'Enter' ||
+          e.key === 'ArrowLeft' ||
+          e.key === 'ArrowRight' ||
           e.key === 'Escape') {
         e.preventDefault();
         e.stopPropagation();
@@ -31,44 +41,62 @@ export default function Display({ value, error, expression, onExpressionChange }
           onExpressionChange(expression.slice(0, -1));
         } else if (e.key === 'Delete' || e.key === 'Escape') {
           onExpressionChange('');
-        } else if (e.key === 'Enter') {
-          // Handle enter in parent component
-        } else {
+        } else if (!e.key.match(/^Arrow/)) {
           onExpressionChange(expression + e.key);
         }
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown, true);
-    return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [expression, onExpressionChange]);
+    if (!isFocused) {
+      window.addEventListener('keydown', handleKeyDown, true);
+      return () => window.removeEventListener('keydown', handleKeyDown, true);
+    }
+  }, [expression, onExpressionChange, onEnter, isFocused]);
 
   return (
-    <Box
-      ref={displayRef}
+    <MotionBox
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
       style={{
         backgroundColor: 'var(--mantine-color-dark-6)',
         padding: '1rem',
         borderRadius: 'var(--mantine-radius-md)',
         marginBottom: '1rem',
         minHeight: '100px',
-        cursor: 'text',
       }}
-      tabIndex={0}
     >
-      <MotionText
-        size="xl"
-        style={{
-          fontFamily: 'monospace',
-          wordBreak: 'break-all',
-          color: error ? 'var(--mantine-color-red-6)' : undefined,
+      <TextInput
+        ref={inputRef}
+        value={error || expression || value || '0'}
+        onChange={(e) => onExpressionChange?.(e.currentTarget.value)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && onEnter) {
+            e.preventDefault();
+            onEnter();
+          }
         }}
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        key={value}
-      >
-        {error || expression || value || '0'}
-      </MotionText>
-    </Box>
+        error={!!error}
+        size="xl"
+        styles={{
+          input: {
+            fontFamily: 'monospace',
+            fontSize: '2rem',
+            backgroundColor: 'transparent',
+            border: 'none',
+            padding: 0,
+            cursor: 'text',
+            '&:focus': {
+              outline: 'none',
+              border: 'none',
+            },
+          },
+          error: {
+            fontSize: '1rem',
+          },
+        }}
+      />
+    </MotionBox>
   );
 } 

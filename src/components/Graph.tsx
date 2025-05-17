@@ -80,7 +80,8 @@ export default function Graph() {
     try {
       const derivativeExpr = derivative(expression, 'x').toString();
       return generatePoints(derivativeExpr);
-    } catch {
+    } catch (error) {
+      console.error('Failed to generate derivative:', error);
       return { x: [], y: [] };
     }
   };
@@ -89,12 +90,17 @@ export default function Graph() {
     if (!newFunction) return;
 
     try {
+      // Clean up the expression
+      const cleanExpression = newFunction
+        .replace(/=/g, '') // Remove equals signs
+        .trim();
+
       // Test if the expression is valid
-      evaluate(newFunction.replace(/x/g, '(1)'));
+      evaluate(cleanExpression.replace(/x/g, '(1)'));
 
       const newGraphFunction: GraphFunction = {
         id: Date.now().toString(),
-        expression: newFunction,
+        expression: cleanExpression,
         color: `hsl(${Math.random() * 360}, 70%, 50%)`,
         isVisible: true,
       };
@@ -120,54 +126,68 @@ export default function Graph() {
   };
 
   const createPlotData = (): Data[] => {
-    const functionPlots = functions.map(f => {
-      const points = generatePoints(f.expression);
-      return {
-        x: points.x,
-        y: points.y,
-        type: 'scatter' as const,
-        mode: 'lines' as const,
-        name: f.expression,
-        line: { color: f.color },
-      };
-    });
+    try {
+      const functionPlots = functions.map(f => {
+        const points = generatePoints(f.expression);
+        return {
+          x: points.x,
+          y: points.y,
+          type: 'scatter' as const,
+          mode: 'lines' as const,
+          name: f.expression,
+          line: { color: f.color },
+        };
+      });
 
-    if (!settings.showDerivatives) {
-      return functionPlots;
+      if (!settings.showDerivatives) {
+        return functionPlots;
+      }
+
+      const derivativePlots = functions.map(f => {
+        try {
+          const points = generateDerivativePoints(f.expression);
+          return {
+            x: points.x,
+            y: points.y,
+            type: 'scatter' as const,
+            mode: 'lines' as const,
+            name: `d/dx(${f.expression})`,
+            line: { 
+              color: f.color,
+              dash: 'dash',
+            },
+          };
+        } catch (error) {
+          console.error('Failed to plot derivative:', error);
+          return null;
+        }
+      }).filter(Boolean);
+
+      return [...functionPlots, ...derivativePlots];
+    } catch (error) {
+      console.error('Failed to create plot data:', error);
+      return [];
     }
-
-    const derivativePlots = functions.map(f => {
-      const points = generateDerivativePoints(f.expression);
-      return {
-        x: points.x,
-        y: points.y,
-        type: 'scatter' as const,
-        mode: 'lines' as const,
-        name: `d/dx(${f.expression})`,
-        line: { 
-          color: f.color,
-          dash: 'dash',
-        },
-      };
-    });
-
-    return [...functionPlots, ...derivativePlots];
   };
 
   return (
     <Box>
       <Group mb="md" align="flex-end">
         <TextInput
-          placeholder="Enter a function (e.g., sin(x))"
+          placeholder="Enter a function (e.g., y = x^2 or sin(x))"
           value={newFunction}
-          onChange={(e) => setNewFunction(e.target.value)}
+          onChange={(e) => setNewFunction(e.currentTarget.value)}
           error={error}
           style={{ flex: 1 }}
           ref={functionInputRef}
         />
         <Button onClick={addFunction}>Add Function</Button>
         <Tooltip label="Clear All">
-          <ActionIcon variant="light" onClick={clearAll}>
+          <ActionIcon variant="light" onClick={() => {
+            setFunctions([]);
+            setNewFunction('');
+            setError(null);
+          }}>
             <IconTrash />
           </ActionIcon>
         </Tooltip>

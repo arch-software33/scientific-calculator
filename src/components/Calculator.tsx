@@ -69,6 +69,11 @@ export default function Calculator() {
     setState(prev => ({ ...prev, expression, error: null }));
   };
 
+  const handleCalculate = () => {
+    if (!state.expression) return;
+    setState(prev => CalculatorService.handleButtonPress('equals', 'equals', prev));
+  };
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Only handle keyboard shortcuts when not in graphing mode
@@ -179,6 +184,7 @@ export default function Calculator() {
             error={state.error} 
             expression={state.expression}
             onExpressionChange={handleExpressionChange}
+            onEnter={handleCalculate}
           />
         )}
 
